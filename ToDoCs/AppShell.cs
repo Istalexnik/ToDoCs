@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 namespace ToDoCs;
 class AppShell : Shell
 {
+    private static readonly Dictionary<Type, string> RouteMap = new()
+    {
+        {typeof(MainPage), "main" }
+    };
+
     public AppShell(MainPage mainPage)
     {
         Items.Add(mainPage);
@@ -16,11 +21,6 @@ class AppShell : Shell
             Routing.RegisterRoute(route.Value, route.Key);
         }
     }
-
-    private static readonly Dictionary<Type, string> RouteMap = new()
-    {
-        {typeof(MainPage), "main" }
-    };
 
     public static string? GetRoute(Type type)
     {
