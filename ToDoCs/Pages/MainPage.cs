@@ -23,11 +23,13 @@ class MainPage : BaseContentPage<MainViewModel>
 
                 new Entry()
                     .Placeholder("Enter new todo")
+                    .FontSize(24) // Increase font size for larger text
                     .Bind(Entry.TextProperty, nameof(MainViewModel.NewToDoText))
                     .TextColor(Colors.Green),
 
                 new Button()
                     .Text("Add ToDo")
+                    .FontSize(24)
                     .BindCommand(nameof(MainViewModel.AddToDoCommand))
                     .TextColor(Colors.Green),
 

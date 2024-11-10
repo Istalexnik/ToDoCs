@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -14,8 +15,8 @@ partial class MainViewModel : BaseViewModel
 
     public ObservableCollection<ToDoItem> ToDoItems { get; }
 
-    private ToDoItem _lastDeletedItem; // Stores the last deleted item temporarily
-    private int _lastDeletedItemIndex; // Stores the last deleted item index for restoration
+    private ToDoItem? _lastDeletedItem; // Nullable to address CS8618 and CS8625 warnings
+    private int _lastDeletedItemIndex;
 
     public ICommand DeleteTaskCommand { get; }
 
@@ -24,7 +25,7 @@ partial class MainViewModel : BaseViewModel
         ToDoItems = new ObservableCollection<ToDoItem>();
 
         // Explicitly define DeleteTaskCommand
-        DeleteTaskCommand = new RelayCommand<ToDoItem>(DeleteTask);
+        DeleteTaskCommand = new RelayCommand<ToDoItem?>(DeleteTask);
     }
 
     [RelayCommand]
@@ -37,7 +38,8 @@ partial class MainViewModel : BaseViewModel
         NewToDoText = string.Empty;
     }
 
-    private async void DeleteTask(ToDoItem item)
+    // Remove 'async' since there is no await call inside this method
+    private void DeleteTask(ToDoItem? item)
     {
         if (item != null && ToDoItems.Contains(item))
         {
@@ -49,14 +51,15 @@ partial class MainViewModel : BaseViewModel
             ToDoItems.Remove(item);
 
             // Show the Snackbar with an "Undo" action
-            var snackbar = Snackbar.Make("Item deleted", async () =>
+            var snackbar = Snackbar.Make("Item deleted", () =>
             {
                 // Restore the item if "Undo" is clicked
                 ToDoItems.Insert(_lastDeletedItemIndex, _lastDeletedItem);
                 _lastDeletedItem = null; // Clear after undo
             }, "Undo", TimeSpan.FromSeconds(3));
 
-            await snackbar.Show();
+            snackbar.Show();
         }
     }
+
 }
