@@ -1,68 +1,73 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using Microsoft.Maui.Graphics.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 using ToDoCs.Models;
 using ToDoCs.Pages;
 using ToDoCs.ViewModels;
 
 namespace ToDoCs;
+
 class MainPage : BaseContentPage<MainViewModel>
 {
     public MainPage(MainViewModel mainViewModel) : base(mainViewModel, "My Main Page")
     {
-        Content = new StackLayout()
+        Content = new StackLayout
         {
             Padding = new Thickness(20),
             Children =
             {
                 new Label()
-                .Text("To-Do List")
-                .Font(size: 32)
-                .CenterHorizontal(),
+                    .Text("To-Do List")
+                    .Font(size: 32)
+                    .CenterHorizontal(),
 
                 new Entry()
-                .Placeholder("Enter new todo")
-                .Bind(Entry.TextProperty, nameof(MainViewModel.NewToDoText))
-                .TextColor(Colors.Green),
+                    .Placeholder("Enter new todo")
+                    .Bind(Entry.TextProperty, nameof(MainViewModel.NewToDoText))
+                    .TextColor(Colors.Green),
 
                 new Button()
-                .Text("Add ToDo")
-                .BindCommand(nameof(MainViewModel.AddToDoCommand))
-                .TextColor(Colors.Blue),
+                    .Text("Add ToDo")
+                    .BindCommand(nameof(MainViewModel.AddToDoCommand))
+                    .TextColor(Colors.Blue),
 
-                new ListView()
+                new CollectionView
                 {
                     ItemTemplate = new DataTemplate(() =>
                     {
                         var titleLabel = new Label()
-                        .Font(size: 18)
-                        .TextColor(Colors.Black)
-                        .Bind(Label.TextProperty, nameof(ToDoItem.Title));
+                            .Font(size: 18)
+                            .TextColor(Colors.Black)
+                            .Bind(Label.TextProperty, nameof(ToDoItem.Title));
 
-                        var completedSwitch = new Switch()
-                        .Bind(Switch.IsToggledProperty, nameof(ToDoItem.IsCompleted))
-                        .Invoke(s => s.Toggled += (sender, args) =>
+                        var deleteSwipeItem = new SwipeItem
                         {
-                             var viewModel = BindingContext;
-                             var item = (ToDoItem)((Switch)sender!).BindingContext;  
-                             viewModel.ToggleCompletionCommand.Execute(item);
-                        });
+                            Text = "Delete",
+                            BackgroundColor = Color.FromArgb("#f44336"),
+                            IconImageSource = "delete_icon.png"
+                        };
 
-                        return new ViewCell()
+                        // Set binding context explicitly
+                        deleteSwipeItem.SetBinding(SwipeItem.CommandProperty, new Binding(nameof(MainViewModel.DeleteTaskCommand), source: this.BindingContext));
+                        deleteSwipeItem.SetBinding(SwipeItem.CommandParameterProperty, new Binding("."));
+
+                        var swipeView = new SwipeView
                         {
-                            View = new StackLayout()
+                            RightItems = new SwipeItems { deleteSwipeItem }.Invoke(s => s.Mode = SwipeMode.Execute),
+                            Content = new Frame
                             {
-                                Orientation = StackOrientation.Horizontal,
-                                Children = {titleLabel, completedSwitch }
+                                Padding = 15,
+                                Margin = 10,
+                                CornerRadius = 8,
+                                BackgroundColor = Colors.White,
+                                Content = titleLabel
                             }
                         };
+
+                        return swipeView;
                     })
                 }
-                .Bind(ListView.ItemsSourceProperty, nameof(MainViewModel.ToDoItems))
+                .Bind(CollectionView.ItemsSourceProperty, nameof(MainViewModel.ToDoItems))
             }
         };
     }
