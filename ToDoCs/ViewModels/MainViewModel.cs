@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Collections.Generic; // Import for Stack
 using System.Windows.Input;
 using ToDoCs.Models;
 
@@ -15,17 +16,13 @@ partial class MainViewModel : BaseViewModel
 
     public ObservableCollection<ToDoItem> ToDoItems { get; }
 
-    private ToDoItem? _lastDeletedItem; // Nullable to address CS8618 and CS8625 warnings
-    private int _lastDeletedItemIndex;
-
-    public ICommand DeleteTaskCommand { get; }
+    // Stack to track deleted items and their indices for multiple undo actions
+    private Stack<(ToDoItem item, int index)> _deletedItemsStack;
 
     public MainViewModel()
     {
         ToDoItems = new ObservableCollection<ToDoItem>();
-
-        // Explicitly define DeleteTaskCommand
-        DeleteTaskCommand = new RelayCommand<ToDoItem?>(DeleteTask);
+        _deletedItemsStack = new Stack<(ToDoItem, int)>();
     }
 
     [RelayCommand]
@@ -38,14 +35,14 @@ partial class MainViewModel : BaseViewModel
         NewToDoText = string.Empty;
     }
 
-    // Remove 'async' since there is no await call inside this method
+    [RelayCommand]
     private void DeleteTask(ToDoItem? item)
     {
         if (item != null && ToDoItems.Contains(item))
         {
-            // Store the deleted item and its index
-            _lastDeletedItem = item;
-            _lastDeletedItemIndex = ToDoItems.IndexOf(item);
+            // Store the deleted item and its index on the stack
+            int itemIndex = ToDoItems.IndexOf(item);
+            _deletedItemsStack.Push((item, itemIndex));
 
             // Remove the item from the collection
             ToDoItems.Remove(item);
@@ -53,13 +50,15 @@ partial class MainViewModel : BaseViewModel
             // Show the Snackbar with an "Undo" action
             var snackbar = Snackbar.Make("Item deleted", () =>
             {
-                // Restore the item if "Undo" is clicked
-                ToDoItems.Insert(_lastDeletedItemIndex, _lastDeletedItem);
-                _lastDeletedItem = null; // Clear after undo
+                if (_deletedItemsStack.Count > 0)
+                {
+                    // Retrieve the last deleted item from the stack and reinsert it
+                    var (lastDeletedItem, lastDeletedIndex) = _deletedItemsStack.Pop();
+                    ToDoItems.Insert(lastDeletedIndex, lastDeletedItem);
+                }
             }, "Undo", TimeSpan.FromSeconds(3));
 
             snackbar.Show();
         }
     }
-
 }
