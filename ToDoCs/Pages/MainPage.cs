@@ -29,7 +29,7 @@ class MainPage : BaseContentPage<MainViewModel>
                 new Button()
                     .Text("Add ToDo")
                     .BindCommand(nameof(MainViewModel.AddToDoCommand))
-                    .TextColor(Colors.Blue),
+                    .TextColor(Colors.Green),
 
                 new CollectionView
                 {
@@ -53,6 +53,7 @@ class MainPage : BaseContentPage<MainViewModel>
 
                         var swipeView = new SwipeView
                         {
+                            Threshold = 100,
                             RightItems = new SwipeItems { deleteSwipeItem }.Invoke(s => s.Mode = SwipeMode.Execute),
                             Content = new Frame
                             {
