@@ -9,9 +9,9 @@ namespace ToDoCs;
 
 class MainPage : BaseContentPage<MainViewModel>
 {
-    public MainPage(MainViewModel mainViewModel) : base(mainViewModel, "My Main Page")
+    public MainPage(MainViewModel mainViewModel) : base(mainViewModel, "Main Page")
     {
-        Content = new ScrollView // Wrap the entire content in a ScrollView
+        Content = new ScrollView
         {
             Content = new VerticalStackLayout
             {
@@ -27,24 +27,23 @@ class MainPage : BaseContentPage<MainViewModel>
                     new Entry()
                         .Placeholder("Enter new todo")
                         .FontSize(24)
-                        .Bind(Entry.TextProperty, nameof(MainViewModel.NewToDoText))
+                        .Bind(Entry.TextProperty, nameof(mainViewModel.NewToDoText))
                         .TextColor(Colors.Green),
 
                     new Button()
                         .Text("Add ToDo")
                         .FontSize(24)
-                        .BindCommand(nameof(MainViewModel.AddToDoCommand))
+                        .BindCommand(nameof(mainViewModel.AddToDoCommand))
                         .TextColor(Colors.Green),
 
                     new CollectionView
                     {
-
                         ItemTemplate = new DataTemplate(() =>
                         {
                             var titleLabel = new Label()
                                 .Font(size: 18)
                                 .TextColor(Colors.Black)
-                                .Bind(Label.TextProperty, "Title");
+                                .Bind(Label.TextProperty, nameof(ToDoItem.Title));
 
                             var deleteSwipeItem = new SwipeItem
                             {
@@ -52,7 +51,9 @@ class MainPage : BaseContentPage<MainViewModel>
                                 BackgroundColor = Color.FromArgb("#f44336"),
                                 IconImageSource = "delete_icon.png"
                             };
-                            deleteSwipeItem.SetBinding(SwipeItem.CommandProperty, new Binding(nameof(MainViewModel.DeleteTaskCommand), source: this.BindingContext));
+
+                            // Bind DeleteTaskCommand directly to Delete SwipeItem
+                            deleteSwipeItem.SetBinding(SwipeItem.CommandProperty, new Binding(nameof(mainViewModel.DeleteTaskCommand), source: this.BindingContext));
                             deleteSwipeItem.SetBinding(SwipeItem.CommandParameterProperty, new Binding("."));
 
                             var swipeView = new SwipeView
@@ -69,10 +70,24 @@ class MainPage : BaseContentPage<MainViewModel>
                                 }
                             };
 
+
+                            swipeView.Content.GestureRecognizers.Add(new TapGestureRecognizer
+                            {
+                                Command = new Command(async () =>
+                                {
+                                    var tappedItem = (ToDoItem)swipeView.BindingContext;
+                                    if (tappedItem != null)
+                                    {
+                                        await mainViewModel.OpenDetails(tappedItem);
+                                    }
+                                }),
+                                CommandParameter = new Binding(".")
+                            });
+
                             return swipeView;
                         })
                     }
-                    .Bind(CollectionView.ItemsSourceProperty, nameof(MainViewModel.ToDoItems))
+                    .Bind(CollectionView.ItemsSourceProperty, nameof(mainViewModel.ToDoItems))
                 }
             }
         };

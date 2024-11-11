@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic; // Import for Stack
 using System.Windows.Input;
 using ToDoCs.Models;
+using ToDoCs.Pages;
+using System.Diagnostics;
 
 namespace ToDoCs.ViewModels;
 
@@ -23,6 +25,7 @@ partial class MainViewModel : BaseViewModel
     {
         ToDoItems = new ObservableCollection<ToDoItem>();
         _deletedItemsStack = new Stack<(ToDoItem, int)>();
+        Debug.WriteLine($"{ToDoItems.Count} - MainViewModel constructor called");
     }
 
     [RelayCommand]
@@ -61,4 +64,19 @@ partial class MainViewModel : BaseViewModel
             snackbar.Show();
         }
     }
+
+    [RelayCommand]
+    public async Task OpenDetails(ToDoItem item)
+    {
+        if (item != null)
+        {
+            var navigationParameters = new Dictionary<string, object> { { "SelectedItem", item } };
+            Debug.WriteLine($"Navigating to details with item: {item.Title}");
+            await Shell.Current.GoToAsync("details", navigationParameters);
+        }
+    }
+
+
+
+
 }

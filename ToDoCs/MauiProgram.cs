@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Markup;
 using Microsoft.Extensions.Logging;
 using ToDoCs.Helpers;
+using ToDoCs.Pages;
 using ToDoCs.ViewModels;
 
 namespace ToDoCs;
@@ -26,7 +27,10 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<ICommunityToolkitHotReloadHandler, HotReloadHandler>();
-        builder.Services.AddTransientWithShellRoute<MainPage, MainViewModel>($"//{typeof(MainPage)}");
+        builder.Services.AddSingletonWithShellRoute<MainPage, MainViewModel>($"//{typeof(MainPage)}");
+        builder.Services.AddTransientWithShellRoute<DetailsPage, DetailsViewModel>(nameof(DetailsPage));
+
+
         return builder.Build();
     }
 }

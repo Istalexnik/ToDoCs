@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ToDoCs.Pages;
 
 namespace ToDoCs;
 class AppShell : Shell
 {
     private static readonly Dictionary<Type, string> RouteMap = new()
     {
-        {typeof(MainPage), "main" }
+        //{typeof(MainPage), "main" },
+        {typeof(DetailsPage), "details" }
     };
 
     public AppShell(MainPage mainPage)
