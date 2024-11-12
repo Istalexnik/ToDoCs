@@ -2,66 +2,99 @@
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
-using System.Collections.Generic; // Import for Stack
-using System.Windows.Input;
-using ToDoCs.Models;
-using ToDoCs.Pages;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using ToDoCs.Helpers;
+using ToDoCs.Models;
+using ToDoCs.Services;
 
 namespace ToDoCs.ViewModels;
 
-partial class MainViewModel : BaseViewModel
+ partial class MainViewModel : BaseViewModel
 {
+    private readonly ToDoService _toDoService;
+
+    public ToDoService ToDoService => _toDoService; // Expose ToDoService here
+
     [ObservableProperty]
     private string newToDoText = string.Empty;
 
-    public ObservableCollection<ToDoItem> ToDoItems { get; }
+    public ObservableCollection<ToDoItem> ToDoItems { get; set; }
 
-    // Stack to track deleted items and their indices for multiple undo actions
     private Stack<(ToDoItem item, int index)> _deletedItemsStack;
 
-    public MainViewModel()
+    public MainViewModel(ToDoService toDoService)
     {
+        _toDoService = toDoService;
         ToDoItems = new ObservableCollection<ToDoItem>();
         _deletedItemsStack = new Stack<(ToDoItem, int)>();
-        Debug.WriteLine($"{ToDoItems.Count} - MainViewModel constructor called");
+
+        LoadToDoItems();
+
     }
 
+    public async void LoadToDoItems()
+    {
+        // Clear the existing items
+        ToDoItems.Clear();
+
+        // Fetch the updated list from the database
+        var items = await ToDoService.GetAllToDoItemsAsync();
+
+        // Add the items back into the ObservableCollection
+        foreach (var item in items)
+        {
+            ToDoItems.Add(item);
+        }
+
+        // Notify the UI that the collection has been updated
+        OnPropertyChanged(nameof(ToDoItems));
+    }
+
+
+
     [RelayCommand]
-    private void AddToDo()
+    private async Task AddToDo()
     {
         if (string.IsNullOrWhiteSpace(NewToDoText))
             return;
 
-        ToDoItems.Add(new ToDoItem { Title = NewToDoText });
+        var newItem = new ToDoItem
+        {
+            Title = NewToDoText
+            // No need to set CreatedDate and EditedDate here
+        };
+
+        await _toDoService.AddToDoItemAsync(newItem);
+        ToDoItems.Insert(0, newItem);
         NewToDoText = string.Empty;
     }
 
+
     [RelayCommand]
-    private void DeleteTask(ToDoItem? item)
+    private async Task DeleteTask(ToDoItem? item)
     {
         if (item != null && ToDoItems.Contains(item))
         {
-            // Store the deleted item and its index on the stack
             int itemIndex = ToDoItems.IndexOf(item);
             _deletedItemsStack.Push((item, itemIndex));
 
-            // Remove the item from the collection
+            await _toDoService.DeleteToDoItemAsync(item);
             ToDoItems.Remove(item);
 
-            // Show the Snackbar with an "Undo" action
-            var snackbar = Snackbar.Make("Item deleted", () =>
+            var snackbar = Snackbar.Make("Item deleted", async () =>
             {
                 if (_deletedItemsStack.Count > 0)
                 {
-                    // Retrieve the last deleted item from the stack and reinsert it
                     var (lastDeletedItem, lastDeletedIndex) = _deletedItemsStack.Pop();
+                    await _toDoService.AddToDoItemAsync(lastDeletedItem);
                     ToDoItems.Insert(lastDeletedIndex, lastDeletedItem);
                 }
             }, "Undo", TimeSpan.FromSeconds(3));
 
-            snackbar.Show();
+            await snackbar.Show();
         }
     }
 
@@ -75,8 +108,6 @@ partial class MainViewModel : BaseViewModel
             await Shell.Current.GoToAsync("details", navigationParameters);
         }
     }
-
-
 
 
 }

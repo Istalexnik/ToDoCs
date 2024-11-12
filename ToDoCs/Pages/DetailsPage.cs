@@ -7,7 +7,7 @@ namespace ToDoCs.Pages;
 
 class DetailsPage : BaseContentPage<DetailsViewModel>
 {
-    private Entry _titleEntry; // Reference to the Entry for setting focus
+    private Entry _titleEntry;
 
     public DetailsPage(DetailsViewModel detailsViewModel) : base(detailsViewModel, "Details Page")
     {
@@ -21,11 +21,17 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
             Padding = new Thickness(20),
             Children =
             {
-                _titleEntry, // Use the named Entry for focus
+                _titleEntry,
+
+                // Corrected binding paths
+                CreateFormattedLabel("Created on: ", "SelectedItem.CreatedDate"),
+                CreateFormattedLabel("Edited on: ", "SelectedItem.EditedDate"),
+
                 new Button()
                     .Text("Save")
                     .FontSize(24)
                     .BindCommand(nameof(detailsViewModel.SaveCommand)),
+
                 new Button()
                     .Text("Delete")
                     .FontSize(24)
@@ -35,16 +41,32 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
         };
     }
 
+    private Label CreateFormattedLabel(string prefixText, string dateBindingPath) =>
+        new Label
+        {
+            FormattedText = new FormattedString
+            {
+                Spans =
+                {
+                    new Span { Text = prefixText, TextColor = Colors.Green },
+                    new Span
+                    {
+                        TextColor = Colors.Red
+                    }
+                    .Bind<Span, DateTime?, string>(
+                        Span.TextProperty,
+                        dateBindingPath,
+                        convert: (DateTime? date) => date.HasValue ? date.Value.ToString("yyyy-MM-dd HH:mm") : "")
+                }
+            }
+        };
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Wait a short moment to ensure the page is fully rendered
         await Task.Delay(100);
-
-        // Set focus to the Entry
         _titleEntry.Focus();
         _titleEntry.CursorPosition = _titleEntry.Text?.Length ?? 0;
     }
-
 }
