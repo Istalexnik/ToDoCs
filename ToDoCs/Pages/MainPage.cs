@@ -9,94 +9,62 @@ class MainPage : BaseContentPage<MainViewModel>
 {
     public MainPage(MainViewModel mainViewModel) : base(mainViewModel, "Main Page")
     {
-
         Content = new Grid
         {
             Children =
-    {
-        // Main content in a ScrollView
-        new ScrollView
-        {
-            Content = new VerticalStackLayout
             {
-                Padding = new Thickness(20),
-                Spacing = 20,
-                BackgroundColor = Color.FromRgba("#999999"),
-                Children =
+                // Main content in a ScrollView
+                new ScrollView
                 {
-                    new Label()
-                        .Text("Notes")
-                        .Font(size: 32)
-                        .CenterHorizontal(),
-
-                    // Replace HorizontalStackLayout with Grid
-                    
-
-                    new CollectionView
+                    Content = new VerticalStackLayout
                     {
-                        ItemsLayout = LinearItemsLayout.Vertical,
-                        ItemTemplate = ToDoItemTemplate()
+                        Padding = new Thickness(20),
+                        Spacing = 20,
+                        BackgroundColor = Color.FromRgba("#999999"),
+                        Children =
+                        {
+                            new Label()
+                                .Text("Notes")
+                                .Font(size: 32)
+                                .CenterHorizontal(),
+
+                            // CollectionView for the to-do items
+                            new CollectionView
+                            {
+                                ItemsLayout = LinearItemsLayout.Vertical,
+                                ItemTemplate = ToDoItemTemplate()
+                            }
+                            .Bind(CollectionView.ItemsSourceProperty, nameof(ViewModel.ToDoItems))
+                        }
                     }
-                    .Bind(CollectionView.ItemsSourceProperty, nameof(ViewModel.ToDoItems))
+                },
+
+                // Floating action button positioned in the middle-right side of the screen
+                new Frame
+                {
+                    WidthRequest = 80,
+                    HeightRequest = 80,
+                    CornerRadius = 40, // Make it circular
+                    BackgroundColor = Color.FromRgba("#AAAAAA"), // Adjust to your preferred color
+                    Padding = 0,
+                    Content = new Label
+                    {
+                        Text = "+",
+                        FontSize = 40,
+                        HorizontalOptions = LayoutOptions.Center,
+                        VerticalOptions = LayoutOptions.Center,
+                        TextColor = Colors.White
+                    },
+                    HorizontalOptions = LayoutOptions.End, // Align to the right
+                    VerticalOptions = LayoutOptions.Center, // Center vertically
+                    Margin = new Thickness(0, 0, 10, 0) // Right margin for spacing
                 }
-            }
-        },
-
-        // Floating action button positioned in the bottom-right corner
-        new Frame
-        {
-            WidthRequest = 80,
-            HeightRequest = 80,
-            CornerRadius = 45, // Make it circular
-            BackgroundColor = Color.FromRgba("#555555"), // Adjust to your preferred color
-            Padding = 0,
-            Content = new Label
-            {
-                Text = "+",
-                FontSize = 60,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                TextColor = Colors.White
-            },
-            HorizontalOptions = LayoutOptions.End,
-            VerticalOptions = LayoutOptions.End,
-            Margin = new Thickness(0, 0, 20, 30) // Adjust margin as needed
-        }
-        .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
-        {
-            Command = ViewModel.AddToDoCommand
-        }))
-    }
-        };
-
-
-
-        var addTaskButton = new Frame
-        {
-            WidthRequest = 60,
-            HeightRequest = 60,
-            CornerRadius = 30, // Make it circular
-            BackgroundColor = Colors.Blue, // Adjust to your preferred color
-            HorizontalOptions = LayoutOptions.End,
-            VerticalOptions = LayoutOptions.End,
-            Padding = 0,
-            Content = new Label
-            {
-                Text = "+",
-                FontSize = 30,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                TextColor = Colors.Red
+                .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
+                {
+                    Command = ViewModel.AddToDoCommand
+                }))
             }
         };
-
-        addTaskButton.GestureRecognizers.Add(new TapGestureRecognizer
-        {
-            Command = ViewModel.AddToDoCommand
-        });
-
-
-
     }
 
     private DataTemplate ToDoItemTemplate()
@@ -112,7 +80,7 @@ class MainPage : BaseContentPage<MainViewModel>
             {
                 Text = "Delete",
                 BackgroundColor = Color.FromRgba("#999999"),
-                IconImageSource = "delete_icon.png"
+                IconImageSource = "delete_icon.png"        
             };
 
             deleteSwipeItem.SetBinding(SwipeItem.CommandProperty, new Binding(nameof(ViewModel.DeleteTaskCommand), source: this.BindingContext));
@@ -121,6 +89,7 @@ class MainPage : BaseContentPage<MainViewModel>
             var swipeView = new SwipeView
             {
                 Threshold = 100,
+                Padding = 0,
                 RightItems = new SwipeItems { deleteSwipeItem }.Invoke(s => s.Mode = SwipeMode.Execute),
                 Content = new Frame
                 {
@@ -130,6 +99,16 @@ class MainPage : BaseContentPage<MainViewModel>
                     BackgroundColor = Colors.White,
                     Content = titleLabel
                 }
+            };
+
+            swipeView.SwipeStarted += (s, e) =>
+            {
+                ((Frame)swipeView.Content).BackgroundColor = Colors.LightGray; // Change color on swipe start
+            };
+
+            swipeView.SwipeEnded += (s, e) =>
+            {
+                ((Frame)swipeView.Content).BackgroundColor = Colors.White; // Reset color on swipe end
             };
 
             swipeView.Content.GestureRecognizers.Add(new TapGestureRecognizer
@@ -149,11 +128,9 @@ class MainPage : BaseContentPage<MainViewModel>
         });
     }
 
-
     protected override void OnAppearing()
     {
         base.OnAppearing();
         ViewModel.LoadToDoItems(); // Refresh the to-do list on page appearance
     }
-
 }

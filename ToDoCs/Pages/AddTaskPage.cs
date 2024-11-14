@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Markup;
 using ToDoCs.ViewModels;
-using static CommunityToolkit.Maui.Markup.GridRowsColumns;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace ToDoCs.Pages;
 
@@ -10,10 +11,10 @@ class AddTaskPage : BaseContentPage<AddTaskViewModel>
 
     public AddTaskPage(AddTaskViewModel addTaskViewModel) : base(addTaskViewModel, "Add Task")
     {
-        // Initialize the Editor and store it in the _taskEditor field
+        // Initialize the Editor and place it inside a Frame for rounded corners
         _taskEditor = new Editor
         {
-            Placeholder = "Enter new todo",
+            Placeholder = "Enter new task",
             PlaceholderColor = Color.FromArgb("#DDDDDD"),
             FontSize = 18,
             TextColor = Colors.Black,
@@ -22,18 +23,50 @@ class AddTaskPage : BaseContentPage<AddTaskViewModel>
         }
         .Bind(Editor.TextProperty, nameof(ViewModel.NewToDoText));
 
+        // Define the main content and floating save button
         Content = new Grid
         {
-            Padding = 0, // Remove any padding around the grid
             Children =
             {
+                // Frame with rounded corners to hold the Editor
                 new Frame
                 {
+                    CornerRadius = 8,
+                    BorderColor = Colors.Gray,
+                    Padding = new Thickness(10),
                     BackgroundColor = Colors.White,
-                    Padding = new Thickness(10), // Adjust if you want space around the editor
                     HasShadow = false,
                     Content = _taskEditor
+                },
+
+                // Floating "Save" button positioned in the middle-right side of the screen
+                new Frame
+                {
+                    WidthRequest = 80,
+                    HeightRequest = 80,
+                    CornerRadius = 40, // Make it circular
+                    BackgroundColor = Color.FromRgba("#AAAAAA"), // Set color for the save button
+                    Padding = 0,
+                    Content = new Label
+                    {
+                        Text = "✔", // Save icon or check mark
+                        FontSize = 40,
+                        HorizontalOptions = LayoutOptions.Center,
+                        VerticalOptions = LayoutOptions.Center,
+                        TextColor = Colors.White
+                    },
+                    HorizontalOptions = LayoutOptions.End, // Align to the right
+                    VerticalOptions = LayoutOptions.Center, // Center vertically
+                    Margin = new Thickness(0, 0, 10, 0) // Right margin for spacing
                 }
+                .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
+                {
+                    Command = new Command(async () =>
+                    {
+                        await ViewModel.SaveTaskAsync();
+                        await Shell.Current.GoToAsync(".."); // Navigate back after saving
+                    })
+                }))
             }
         };
     }
@@ -41,13 +74,7 @@ class AddTaskPage : BaseContentPage<AddTaskViewModel>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await Task.Delay(100);
+        await Task.Delay(100); // Small delay to ensure UI is fully loaded
         _taskEditor.Focus(); // Set focus to the Editor when the page appears
-    }
-
-    protected override async void OnDisappearing()
-    {
-        base.OnDisappearing();
-        await ViewModel.SaveTaskAsync(); // Save the task to the database
     }
 }

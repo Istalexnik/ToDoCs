@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ToDoCs.Pages;
+﻿using ToDoCs.Pages;
 
 namespace ToDoCs;
 class AppShell : Shell
@@ -23,6 +18,10 @@ class AppShell : Shell
         {
             Routing.RegisterRoute(route.Value, route.Key);
         }
+
+        Shell.SetBackgroundColor(this, Color.FromRgba("#999999"));
+        Shell.SetTitleColor(this, Colors.White);
+
     }
 
     public static string? GetRoute(Type type)
