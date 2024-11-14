@@ -22,13 +22,25 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     BackgroundColor = Color.FromRgba("#999999"),
                     Children =
                     {
-                        new Entry()
-                            .Placeholder("Edit title")
-                            .FontSize(24)
-                            .Bind(Entry.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay),
+                        // Wrap Editor in a Frame to apply rounded corners
+                        new Frame
+                        {
+                            CornerRadius = 8,
+                            BorderColor = Colors.Gray,
+                            Padding = 0, // Remove padding to let Editor fill the Frame
+                            BackgroundColor = Colors.White,
+                            Content = new Editor
+                            {
+                                Placeholder = "Edit title",
+                                FontSize = 24,
+                                TextColor = Colors.Black,
+                                BackgroundColor = Colors.Transparent, // Make Editor background transparent
+                                AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
+                            }
+                            .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay)
+                        },
 
                         CreateDateInfo(),
-
                     }
                 },
 
