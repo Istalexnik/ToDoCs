@@ -72,7 +72,7 @@ class MainPage : BaseContentPage<MainViewModel>
         return new DataTemplate(() =>
         {
             var titleLabel = new Label()
-                .Font(size: 18)
+                .Font(size: 20) // Increase font size for better readability
                 .TextColor(Colors.Black)
                 .Bind(Label.TextProperty, nameof(ToDoItem.Title));
 
@@ -80,7 +80,7 @@ class MainPage : BaseContentPage<MainViewModel>
             {
                 Text = "Delete",
                 BackgroundColor = Color.FromRgba("#999999"),
-                IconImageSource = "delete_icon.png"        
+                IconImageSource = "delete_icon.png"
             };
 
             deleteSwipeItem.SetBinding(SwipeItem.CommandProperty, new Binding(nameof(ViewModel.DeleteTaskCommand), source: this.BindingContext));
@@ -93,10 +93,11 @@ class MainPage : BaseContentPage<MainViewModel>
                 RightItems = new SwipeItems { deleteSwipeItem }.Invoke(s => s.Mode = SwipeMode.Execute),
                 Content = new Frame
                 {
-                    Padding = new Thickness(10),
-                    Margin = new Thickness(0, 5),
-                    CornerRadius = 8,
+                    Padding = new Thickness(25), // Increase padding inside the frame
+                    Margin = new Thickness(0, 5), // Increase margin between items
+                    CornerRadius = 12, // Increase corner radius for a rounded look
                     BackgroundColor = Colors.White,
+                    HasShadow = true, // Add shadow for elevation effect
                     Content = titleLabel
                 }
             };
@@ -127,6 +128,7 @@ class MainPage : BaseContentPage<MainViewModel>
             return swipeView;
         });
     }
+
 
     protected override void OnAppearing()
     {

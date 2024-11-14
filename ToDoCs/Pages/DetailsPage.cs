@@ -16,9 +16,9 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
         _editor = new Editor
         {
             Placeholder = "Edit title",
-            FontSize = 24,
+            FontSize = 20, // Adjusted font size for consistency with the item template
             TextColor = Colors.Black,
-            BackgroundColor = Colors.Transparent, // Make Editor background transparent
+            BackgroundColor = Colors.Transparent, // Transparent to inherit frame's background
             AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
         }
         .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay);
@@ -35,13 +35,15 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     BackgroundColor = Color.FromRgba("#999999"),
                     Children =
                     {
-                        // Wrap Editor in a Frame to apply rounded corners
+                        // Wrap Editor in a Frame to apply rounded corners and padding
                         new Frame
                         {
-                            CornerRadius = 8,
+                            CornerRadius = 12, // Match corner radius from ToDoItemTemplate
                             BorderColor = Colors.Gray,
-                            Padding = 0, // Remove padding to let Editor fill the Frame
+                            Padding = new Thickness(25), // Same padding for consistency
+                            Margin = new Thickness(0, 5), // Similar margin for alignment
                             BackgroundColor = Colors.White,
+                            HasShadow = true, // Add shadow for elevation effect
                             Content = _editor // Set the Editor as content
                         },
 
@@ -59,7 +61,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     Padding = 0,
                     Content = new Label
                     {
-                        Text = "V",
+                        Text = "✔",
                         FontSize = 40,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
@@ -87,7 +89,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     Padding = 0,
                     Content = new Label
                     {
-                        Text = "X",
+                        Text = "✖",
                         FontSize = 40,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
@@ -125,7 +127,6 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
         // Move the cursor to the end of the existing text
         _editor.CursorPosition = _editor.Text.Length;
     }
-
 
     private View CreateDateInfo()
     {
