@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Markup;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Layouts;
 using ToDoCs.ViewModels;
 using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
@@ -12,51 +13,45 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
 
     public DetailsPage(DetailsViewModel detailsViewModel) : base(detailsViewModel, "Details Page")
     {
-        // Initialize the Editor and store it in the _editor field
+        // Initialize the Editor
         _editor = new Editor
         {
             Placeholder = "Edit title",
-            FontSize = 20, // Adjusted font size for consistency with the item template
+            FontSize = 20,
             TextColor = Colors.Black,
-            BackgroundColor = Colors.Transparent, // Transparent to inherit frame's background
-            AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
+            BackgroundColor = Colors.Transparent,
+            AutoSize = EditorAutoSizeOption.TextChanges
         }
         .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay);
 
         Content = new Grid
         {
+            RowDefinitions = Rows.Define(Star, Auto),
+            ColumnDefinitions = Columns.Define(Star),
+
             Children =
             {
-                // Main content
-                new VerticalStackLayout
+                // Frame with rounded corners for Editor
+                new Frame
                 {
+                    CornerRadius = 12,
+                    BorderColor = Colors.Gray,
+                    BackgroundColor = Colors.White,
                     Padding = new Thickness(20),
-                    Spacing = 20,
-                    BackgroundColor = Color.FromRgba("#999999"),
-                    Children =
-                    {
-                        // Wrap Editor in a Frame to apply rounded corners and padding
-                        new Frame
-                        {
-                            CornerRadius = 12, // Match corner radius from ToDoItemTemplate
-                            BorderColor = Colors.Gray,
-                            Padding = new Thickness(25), // Same padding for consistency
-                            Margin = new Thickness(0, 5), // Similar margin for alignment
-                            BackgroundColor = Colors.White,
-                            HasShadow = true, // Add shadow for elevation effect
-                            Content = _editor // Set the Editor as content
-                        },
+                    Content = _editor
+                }
+                .Row(0),
 
-                        CreateDateInfo(),
-                    }
-                },
+                // Date Info section
+                CreateDateInfo()
+                .Row(1),
 
-                // Floating circular "Save" button on the middle-right
+                // Floating Save button (positioned middle-right)
                 new Frame
                 {
                     WidthRequest = 80,
                     HeightRequest = 80,
-                    CornerRadius = 40, // Make it circular
+                    CornerRadius = 40,
                     BackgroundColor = Color.FromRgba("#AAAAAA"),
                     Padding = 0,
                     Content = new Label
@@ -66,25 +61,23 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
                         TextColor = Colors.White
-                    },
-                    HorizontalOptions = LayoutOptions.End,
-                    VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 0, 10, 0) // Right margin for spacing
+                    }
                 }
+                .RowSpan(2)
+                .ColumnSpan(2)
+                .LayoutFlags(AbsoluteLayoutFlags.PositionProportional)
+                .LayoutBounds(1, 0.5) // Middle-right
                 .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    Command = new Command(async () =>
-                    {
-                        await ViewModel.SaveCommand.ExecuteAsync(null); // Execute the save command
-                    })
+                    Command = new Command(async () => await ViewModel.SaveCommand.ExecuteAsync(null))
                 })),
 
-                // Floating circular "Delete" button on the middle-left
+                // Floating Delete button (positioned middle-left)
                 new Frame
                 {
                     WidthRequest = 80,
                     HeightRequest = 80,
-                    CornerRadius = 40, // Make it circular
+                    CornerRadius = 40,
                     BackgroundColor = Color.FromRgba("#AAAAAA"),
                     Padding = 0,
                     Content = new Label
@@ -94,17 +87,15 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
                         TextColor = Colors.White
-                    },
-                    HorizontalOptions = LayoutOptions.Start,
-                    VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(10, 0, 0, 0) // Left margin for spacing
+                    }
                 }
+                .RowSpan(2)
+                .ColumnSpan(2)
+                .LayoutFlags(AbsoluteLayoutFlags.PositionProportional)
+                .LayoutBounds(0, 0.5) // Middle-left
                 .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    Command = new Command(async () =>
-                    {
-                        await ViewModel.DeleteCommand.ExecuteAsync(null); // Execute the delete command
-                    })
+                    Command = new Command(async () => await ViewModel.DeleteCommand.ExecuteAsync(null))
                 }))
             }
         };
@@ -113,18 +104,8 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await Task.Delay(100); // Small delay to ensure UI is fully loaded
-
-        // Set focus to the Editor
+        await Task.Delay(100);
         _editor.Focus();
-
-        // Optionally add a space or newline at the end
-        if (!string.IsNullOrEmpty(_editor.Text))
-        {
-            _editor.Text += " "; // Add a space (or "\n" for a new line)
-        }
-
-        // Move the cursor to the end of the existing text
         _editor.CursorPosition = _editor.Text.Length;
     }
 
@@ -132,32 +113,23 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
     {
         return new Grid
         {
-            RowDefinitions = Rows.Define(
-                (Row.Created, Auto),
-                (Row.Edited, Auto)
-            ),
-            ColumnDefinitions = Columns.Define(
-                (Column.Label, Auto),
-                (Column.Value, Star)
-            ),
+            RowDefinitions = Rows.Define(Auto, Auto),
+            ColumnDefinitions = Columns.Define(Auto, Star),
+
             Children =
             {
                 new Label { Text = "Created on: ", FontAttributes = FontAttributes.Bold }
-                    .Row(Row.Created).Column(Column.Label),
+                    .Row(0).Column(0),
                 new Label()
                     .Bind(Label.TextProperty, nameof(ViewModel.CreatedDateText))
-                    .Row(Row.Created).Column(Column.Value),
+                    .Row(0).Column(1),
 
                 new Label { Text = "Edited on: ", FontAttributes = FontAttributes.Bold }
-                    .Row(Row.Edited).Column(Column.Label),
+                    .Row(1).Column(0),
                 new Label()
                     .Bind(Label.TextProperty, nameof(ViewModel.EditedDateText))
-                    .Row(Row.Edited).Column(Column.Value),
+                    .Row(1).Column(1)
             }
         };
     }
-
-    // Enums must be declared at class scope, not inside methods
-    enum Row { Created, Edited }
-    enum Column { Label, Value }
 }
