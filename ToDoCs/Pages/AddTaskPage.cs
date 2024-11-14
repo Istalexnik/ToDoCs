@@ -49,7 +49,7 @@ class AddTaskPage : BaseContentPage<AddTaskViewModel>
                     Padding = 0,
                     Content = new Label
                     {
-                        Text = "✔", // Save icon or check mark
+                        Text = "V", // Save icon or check mark
                         FontSize = 40,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,

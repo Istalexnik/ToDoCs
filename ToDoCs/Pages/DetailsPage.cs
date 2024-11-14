@@ -59,7 +59,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     Padding = 0,
                     Content = new Label
                     {
-                        Text = "✔",
+                        Text = "V",
                         FontSize = 40,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
@@ -87,7 +87,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                     Padding = 0,
                     Content = new Label
                     {
-                        Text = "✖",
+                        Text = "X",
                         FontSize = 40,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
