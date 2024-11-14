@@ -8,8 +8,21 @@ namespace ToDoCs.Pages;
 
 class DetailsPage : BaseContentPage<DetailsViewModel>
 {
+    private readonly Editor _editor;
+
     public DetailsPage(DetailsViewModel detailsViewModel) : base(detailsViewModel, "Details Page")
     {
+        // Initialize the Editor and store it in the _editor field
+        _editor = new Editor
+        {
+            Placeholder = "Edit title",
+            FontSize = 24,
+            TextColor = Colors.Black,
+            BackgroundColor = Colors.Transparent, // Make Editor background transparent
+            AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
+        }
+        .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay);
+
         Content = new Grid
         {
             Children =
@@ -29,15 +42,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                             BorderColor = Colors.Gray,
                             Padding = 0, // Remove padding to let Editor fill the Frame
                             BackgroundColor = Colors.White,
-                            Content = new Editor
-                            {
-                                Placeholder = "Edit title",
-                                FontSize = 24,
-                                TextColor = Colors.Black,
-                                BackgroundColor = Colors.Transparent, // Make Editor background transparent
-                                AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
-                            }
-                            .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay)
+                            Content = _editor // Set the Editor as content
                         },
 
                         CreateDateInfo(),
@@ -101,6 +106,13 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                 }))
             }
         };
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await Task.Delay(100); // Small delay to ensure UI is fully loaded
+        _editor.Focus(); // Set focus to the Editor when the page appears
     }
 
     private View CreateDateInfo()
