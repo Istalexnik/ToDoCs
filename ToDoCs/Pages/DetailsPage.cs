@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Maui.Markup;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using Microsoft.Maui.Layouts;
 using ToDoCs.ViewModels;
 using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
@@ -13,14 +12,14 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
 
     public DetailsPage(DetailsViewModel detailsViewModel) : base(detailsViewModel, "Details Page")
     {
-        // Initialize the Editor
+        // Initialize the Editor and store it in the _editor field
         _editor = new Editor
         {
             Placeholder = "Edit title",
             FontSize = 20,
             TextColor = Colors.Black,
-            BackgroundColor = Colors.Transparent,
-            AutoSize = EditorAutoSizeOption.TextChanges
+            BackgroundColor = Colors.Transparent, // Transparent to inherit frame's background
+            AutoSize = EditorAutoSizeOption.TextChanges // Enable automatic resizing
         }
         .Bind(Editor.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay);
 
@@ -31,7 +30,7 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
 
             Children =
             {
-                // Frame with rounded corners for Editor
+                // Main content with Editor wrapped in a Frame
                 new Frame
                 {
                     CornerRadius = 12,
@@ -46,12 +45,12 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                 CreateDateInfo()
                 .Row(1),
 
-                // Floating Save button (positioned middle-right)
+                // Floating Save button on the right side, centered vertically
                 new Frame
                 {
                     WidthRequest = 80,
                     HeightRequest = 80,
-                    CornerRadius = 40,
+                    CornerRadius = 40, // Make it circular
                     BackgroundColor = Color.FromRgba("#AAAAAA"),
                     Padding = 0,
                     Content = new Label
@@ -61,23 +60,27 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
                         TextColor = Colors.White
-                    }
+                    },
+                    HorizontalOptions = LayoutOptions.End, // Align to the right
+                    VerticalOptions = LayoutOptions.Center, // Center vertically
+                    Margin = new Thickness(0, 0, 20, 0) // Margin to position towards the right edge
                 }
-                .RowSpan(2)
-                .ColumnSpan(2)
-                .LayoutFlags(AbsoluteLayoutFlags.PositionProportional)
-                .LayoutBounds(1, 0.5) // Middle-right
                 .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    Command = new Command(async () => await ViewModel.SaveCommand.ExecuteAsync(null))
-                })),
+                    Command = new Command(async () =>
+                    {
+                        await ViewModel.SaveCommand.ExecuteAsync(null); // Execute the save command
+                    })
+                }))
+                .Row(0)
+                .Column(0),
 
-                // Floating Delete button (positioned middle-left)
+                // Floating Delete button on the left side, centered vertically
                 new Frame
                 {
                     WidthRequest = 80,
                     HeightRequest = 80,
-                    CornerRadius = 40,
+                    CornerRadius = 40, // Make it circular
                     BackgroundColor = Color.FromRgba("#AAAAAA"),
                     Padding = 0,
                     Content = new Label
@@ -87,16 +90,20 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,
                         TextColor = Colors.White
-                    }
+                    },
+                    HorizontalOptions = LayoutOptions.Start, // Align to the left
+                    VerticalOptions = LayoutOptions.Center, // Center vertically
+                    Margin = new Thickness(20, 0, 0, 0) // Margin to position towards the left edge
                 }
-                .RowSpan(2)
-                .ColumnSpan(2)
-                .LayoutFlags(AbsoluteLayoutFlags.PositionProportional)
-                .LayoutBounds(0, 0.5) // Middle-left
                 .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    Command = new Command(async () => await ViewModel.DeleteCommand.ExecuteAsync(null))
+                    Command = new Command(async () =>
+                    {
+                        await ViewModel.DeleteCommand.ExecuteAsync(null); // Execute the delete command
+                    })
                 }))
+                .Row(0)
+                .Column(0),
             }
         };
     }
@@ -104,8 +111,18 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await Task.Delay(100);
+        await Task.Delay(100); // Small delay to ensure UI is fully loaded
+
+        // Set focus to the Editor
         _editor.Focus();
+
+        // Optionally add a space or newline at the end
+        if (!string.IsNullOrEmpty(_editor.Text))
+        {
+            _editor.Text += " "; // Add a space (or "\n" for a new line)
+        }
+
+        // Move the cursor to the end of the existing text
         _editor.CursorPosition = _editor.Text.Length;
     }
 
