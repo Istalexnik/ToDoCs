@@ -45,22 +45,22 @@ class MainPage : BaseContentPage<MainViewModel>
         // Floating action button positioned in the bottom-right corner
         new Frame
         {
-            WidthRequest = 60,
-            HeightRequest = 60,
-            CornerRadius = 30, // Make it circular
-            BackgroundColor = Colors.Blue, // Adjust to your preferred color
+            WidthRequest = 80,
+            HeightRequest = 80,
+            CornerRadius = 45, // Make it circular
+            BackgroundColor = Color.FromRgba("#555555"), // Adjust to your preferred color
             Padding = 0,
             Content = new Label
             {
                 Text = "+",
-                FontSize = 30,
+                FontSize = 60,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
                 TextColor = Colors.White
             },
             HorizontalOptions = LayoutOptions.End,
             VerticalOptions = LayoutOptions.End,
-            Margin = new Thickness(0, 0, 20, 20) // Adjust margin as needed
+            Margin = new Thickness(0, 0, 20, 30) // Adjust margin as needed
         }
         .Invoke(f => f.GestureRecognizers.Add(new TapGestureRecognizer
         {
@@ -111,7 +111,7 @@ class MainPage : BaseContentPage<MainViewModel>
             var deleteSwipeItem = new SwipeItem
             {
                 Text = "Delete",
-                BackgroundColor = Color.FromRgba("#777777"),
+                BackgroundColor = Color.FromRgba("#999999"),
                 IconImageSource = "delete_icon.png"
             };
 
