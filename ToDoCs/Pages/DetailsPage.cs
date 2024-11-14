@@ -112,8 +112,20 @@ class DetailsPage : BaseContentPage<DetailsViewModel>
     {
         base.OnAppearing();
         await Task.Delay(100); // Small delay to ensure UI is fully loaded
-        _editor.Focus(); // Set focus to the Editor when the page appears
+
+        // Set focus to the Editor
+        _editor.Focus();
+
+        // Optionally add a space or newline at the end
+        if (!string.IsNullOrEmpty(_editor.Text))
+        {
+            _editor.Text += " "; // Add a space (or "\n" for a new line)
+        }
+
+        // Move the cursor to the end of the existing text
+        _editor.CursorPosition = _editor.Text.Length;
     }
+
 
     private View CreateDateInfo()
     {
