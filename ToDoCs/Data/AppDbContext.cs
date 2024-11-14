@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoCs.Models;
+using Microsoft.Maui.Storage;
+using System.IO;
 
 namespace ToDoCs.Data
 {
@@ -23,7 +25,9 @@ namespace ToDoCs.Data
             if (!optionsBuilder.IsConfigured)
             {
                 // Provide a fixed database path for design-time
-                optionsBuilder.UseSqlite("Filename=ToDoDatabase2.db");
+                var databasePath = Path.Combine(FileSystem.AppDataDirectory, "ToDoDatabase2.db");
+                Directory.CreateDirectory(FileSystem.AppDataDirectory); // Ensure directory exists
+                optionsBuilder.UseSqlite($"Filename={databasePath}");
             }
         }
     }

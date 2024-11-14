@@ -8,8 +8,8 @@ using ToDoCs.Pages;
 using ToDoCs.ViewModels;
 using System.IO;
 using Microsoft.Maui.Storage;
-using ToDoCs.Helpers;
 using System.Diagnostics;
+using ToDoCs.Helpers;
 
 namespace ToDoCs;
 
@@ -32,16 +32,17 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // Configure EF Core with SQLite for runtime
-        var databasePath = $"Filename={Path.Combine(FileSystem.AppDataDirectory, "ToDoDatabase2.db")}";
+        // Configure EF Core with SQLite for runtime, using AppDataDirectory
+        var databasePath = Path.Combine(FileSystem.AppDataDirectory, "ToDoDatabase2.db");
+        Directory.CreateDirectory(FileSystem.AppDataDirectory); // Ensure directory exists
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(databasePath));
+            options.UseSqlite($"Filename={databasePath}"));
         Debug.WriteLine($"Database path: {databasePath}");
-
 
         // Apply any pending migrations on startup
         ApplyMigrations(builder.Services);
 
+        // Register services and pages
         builder.Services.AddSingleton<ToDoService>();
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<ICommunityToolkitHotReloadHandler, HotReloadHandler>();

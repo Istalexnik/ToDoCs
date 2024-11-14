@@ -89,8 +89,10 @@ partial class DetailsViewModel : BaseViewModel
                 // Delete the item from the database
                 await _mainViewModel.ToDoService.DeleteToDoItemAsync(SelectedItem);
 
-                // Show the Snackbar with an "Undo" action
-                var snackbar = Snackbar.Make("Item deleted", async () =>
+                if (DeviceInfo.Platform != DevicePlatform.WinUI)
+                {
+                    // Show the Snackbar with an "Undo" action
+                    var snackbar = Snackbar.Make("Item deleted", async () =>
                 {
                     if (_deletedItemStack.Count > 0)
                     {
@@ -101,7 +103,8 @@ partial class DetailsViewModel : BaseViewModel
                     }
                 }, "Undo", TimeSpan.FromSeconds(3));
 
-                await snackbar.Show();
+                    await snackbar.Show();
+                }
                 Debug.WriteLine($"Deleted item: {SelectedItem.Title}");
             }
             else
