@@ -26,7 +26,5 @@ namespace ToDoCs.Data
                 optionsBuilder.UseSqlite("Filename=ToDoDatabase2.db");
             }
         }
-
-        // Remove the OnModelCreating method if it only contained default value configurations
     }
 }

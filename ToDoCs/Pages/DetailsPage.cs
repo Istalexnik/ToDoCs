@@ -2,71 +2,87 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using ToDoCs.ViewModels;
+using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
 namespace ToDoCs.Pages;
 
 class DetailsPage : BaseContentPage<DetailsViewModel>
 {
-    private Entry _titleEntry;
-
     public DetailsPage(DetailsViewModel detailsViewModel) : base(detailsViewModel, "Details Page")
     {
-        _titleEntry = new Entry()
-            .Placeholder("Edit title")
-            .FontSize(24)
-            .Bind(Entry.TextProperty, nameof(detailsViewModel.EditedTitle), BindingMode.TwoWay);
 
-        Content = new StackLayout
+        Content = new VerticalStackLayout
         {
             Padding = new Thickness(20),
+            Spacing = 20,
+            BackgroundColor = Color.FromRgba("#999999"),
             Children =
             {
-                _titleEntry,
-
-                // Corrected binding paths
-                CreateFormattedLabel("Created on: ", "SelectedItem.CreatedDate"),
-                CreateFormattedLabel("Edited on: ", "SelectedItem.EditedDate"),
-
-                new Button()
-                    .Text("Save")
+                new Entry()
+                    .Placeholder("Edit title")
                     .FontSize(24)
-                    .BindCommand(nameof(detailsViewModel.SaveCommand)),
+                    .Bind(Entry.TextProperty, nameof(ViewModel.EditedTitle), BindingMode.TwoWay),
 
-                new Button()
-                    .Text("Delete")
-                    .FontSize(24)
-                    .TextColor(Colors.Red)
-                    .BindCommand(nameof(detailsViewModel.DeleteCommand))
-            }
-        };
-    }
+                CreateDateInfo(),
 
-    private Label CreateFormattedLabel(string prefixText, string dateBindingPath) =>
-        new Label
-        {
-            FormattedText = new FormattedString
-            {
-                Spans =
+                // Use Grid instead of HorizontalStackLayout
+                new Grid
                 {
-                    new Span { Text = prefixText, TextColor = Colors.Green },
-                    new Span
+                    ColumnDefinitions = Columns.Define(Star, Star),
+                    ColumnSpacing = 20,
+                    Children =
                     {
-                        TextColor = Colors.Red
+                        new Button()
+                            .Text("Save")
+                            .FontSize(24)
+                            .BindCommand(nameof(ViewModel.SaveCommand))
+                            .BackgroundColor(Colors.Green)
+                            .TextColor(Colors.White)
+                            .Column(0),
+
+                        new Button()
+                            .Text("Delete")
+                            .FontSize(24)
+                            .TextColor(Colors.White)
+                            .BackgroundColor(Colors.Red)
+                            .BindCommand(nameof(ViewModel.DeleteCommand))
+                            .Column(1)
                     }
-                    .Bind<Span, DateTime?, string>(
-                        Span.TextProperty,
-                        dateBindingPath,
-                        convert: (DateTime? date) => date.HasValue ? date.Value.ToString("yyyy-MM-dd HH:mm") : "")
                 }
             }
         };
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-
-        await Task.Delay(100);
-        _titleEntry.Focus();
-        _titleEntry.CursorPosition = _titleEntry.Text?.Length ?? 0;
     }
+
+    private View CreateDateInfo()
+    {
+        return new Grid
+        {
+            RowDefinitions = Rows.Define(
+                (Row.Created, Auto),
+                (Row.Edited, Auto)
+            ),
+            ColumnDefinitions = Columns.Define(
+                (Column.Label, Auto),
+                (Column.Value, Star)
+            ),
+            Children =
+            {
+                new Label { Text = "Created on: ", FontAttributes = FontAttributes.Bold }
+                    .Row(Row.Created).Column(Column.Label),
+                new Label()
+                    .Bind(Label.TextProperty, nameof(ViewModel.CreatedDateText))
+                    .Row(Row.Created).Column(Column.Value),
+
+                new Label { Text = "Edited on: ", FontAttributes = FontAttributes.Bold }
+                    .Row(Row.Edited).Column(Column.Label),
+                new Label()
+                    .Bind(Label.TextProperty, nameof(ViewModel.EditedDateText))
+                    .Row(Row.Edited).Column(Column.Value),
+            }
+        };
+    }
+
+    // Enums must be declared at class scope, not inside methods
+    enum Row { Created, Edited }
+    enum Column { Label, Value }
 }

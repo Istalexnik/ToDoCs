@@ -47,6 +47,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ICommunityToolkitHotReloadHandler, HotReloadHandler>();
         builder.Services.AddSingletonWithShellRoute<MainPage, MainViewModel>($"//{typeof(MainPage)}");
         builder.Services.AddTransientWithShellRoute<DetailsPage, DetailsViewModel>(nameof(DetailsPage));
+        builder.Services.AddTransientWithShellRoute<AddTaskPage, AddTaskViewModel>(nameof(AddTaskPage));
 
         return builder.Build();
     }

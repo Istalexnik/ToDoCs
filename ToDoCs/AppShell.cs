@@ -10,8 +10,9 @@ class AppShell : Shell
 {
     private static readonly Dictionary<Type, string> RouteMap = new()
     {
-        //{typeof(MainPage), "main" },
-        {typeof(DetailsPage), "details" }
+        {typeof(MainPage), "main" },
+        {typeof(DetailsPage), "details" },
+        {typeof(AddTaskPage), "addtask" },
     };
 
     public AppShell(MainPage mainPage)

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Alerts;
+﻿using AndroidX.Lifecycle;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using ToDoCs.Helpers;
 using ToDoCs.Models;
+using ToDoCs.Pages;
 using ToDoCs.Services;
 
 namespace ToDoCs.ViewModels;
@@ -18,8 +20,7 @@ namespace ToDoCs.ViewModels;
 
     public ToDoService ToDoService => _toDoService; // Expose ToDoService here
 
-    [ObservableProperty]
-    private string newToDoText = string.Empty;
+
 
     public ObservableCollection<ToDoItem> ToDoItems { get; set; }
 
@@ -58,18 +59,7 @@ namespace ToDoCs.ViewModels;
     [RelayCommand]
     private async Task AddToDo()
     {
-        if (string.IsNullOrWhiteSpace(NewToDoText))
-            return;
-
-        var newItem = new ToDoItem
-        {
-            Title = NewToDoText
-            // No need to set CreatedDate and EditedDate here
-        };
-
-        await _toDoService.AddToDoItemAsync(newItem);
-        ToDoItems.Insert(0, newItem);
-        NewToDoText = string.Empty;
+        await Shell.Current.GoToAsync(nameof(AddTaskPage));
     }
 
 
